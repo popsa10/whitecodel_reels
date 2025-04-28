@@ -44,6 +44,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
             () => PageView.builder(
           controller: controller.pageController,
           itemCount: controller.pageCount.value,
+          padEnds: true,
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index) {
             return buildTile(index);

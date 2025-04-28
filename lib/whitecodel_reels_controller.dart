@@ -12,7 +12,7 @@ import 'video_controller_service.dart';
 class WhiteCodelReelsController extends GetxController
     with GetTickerProviderStateMixin, WidgetsBindingObserver {
   // Page controller for managing pages of videos
-  PageController pageController = PageController(viewportFraction: 0.99999);
+  PageController pageController = PageController(viewportFraction: 0.8);
 
   // List of video player controllers
   RxList<VideoPlayerController> videoPlayerControllerList =
