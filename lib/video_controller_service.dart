@@ -67,10 +67,14 @@ class CachedVideoControllerService extends VideoControllerService {
 
     // Create BetterPlayerConfiguration
     BetterPlayerConfiguration configuration = const BetterPlayerConfiguration(
-      autoPlay: false,
-      looping: false,
-      aspectRatio: 16 / 9,
-      fit: BoxFit.contain,
+      autoPlay: true,
+      looping: true,
+      controlsConfiguration: BetterPlayerControlsConfiguration(
+        showControls: false,
+        showControlsOnInitialize: false,
+      ),
+      fit: BoxFit.cover,
+
     );
 
     // Return the BetterPlayerController with the configuration and data source

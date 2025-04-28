@@ -42,7 +42,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
           reelsVideoList: videoList ?? [],
           isCaching: isCaching,
           startIndex: startIndex,
-      reelsVideoThumbnail: videoThumbnailList ?? []
+      reelsVideoThumbnailList: videoThumbnailList ?? []
         ));
     return Scaffold(
       backgroundColor: Colors.black,
@@ -64,14 +64,14 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       key: Key(index.toString()),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction < 0.5) {
-          controller.betterPlayerControllerList[index].seekTo(Duration.zero);
-          controller.betterPlayerControllerList[index].pause();
+          controller.videoPlayerControllerList[index].seekTo(Duration.zero);
+          controller.videoPlayerControllerList[index].pause();
           // controller.visible.value = true;
           controller.refreshView();
           controller.animationController.stop();
         } else {
           controller.listenEvents(index);
-          controller.betterPlayerControllerList[index].play();
+          controller.videoPlayerControllerList[index].play();
           // controller.visible.value = true;
           Future.delayed(const Duration(milliseconds: 500), () {
             // controller.visible.value = false;
@@ -87,13 +87,13 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       },
       child: GestureDetector(
         onTap: () {
-          if (controller.betterPlayerControllerList[index].isPlaying()!) {
-            controller.betterPlayerControllerList[index].pause();
+          if (controller.videoPlayerControllerList[index].isPlaying()!) {
+            controller.videoPlayerControllerList[index].pause();
             controller.visible.value = true;
             controller.refreshView();
             controller.animationController.stop();
           } else {
-            controller.betterPlayerControllerList[index].play();
+            controller.videoPlayerControllerList[index].play();
             controller.visible.value = true;
             Future.delayed(const Duration(milliseconds: 500), () {
               controller.visible.value = false;
@@ -106,22 +106,22 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
         child: Obx(() {
           if (controller.loading.value ||
               !(controller
-                  .betterPlayerControllerList[index].isVideoInitialized() ?? false)) {
+                  .videoPlayerControllerList[index].isVideoInitialized() ?? false)) {
             return loader ?? const Center(child: CircularProgressIndicator());
           }
 
           return builder == null
               ? VideoFullScreenPage(
                   videoPlayerController:
-                      controller.betterPlayerControllerList[index])
+                      controller.videoPlayerControllerList[index])
               : builder!(
                   context,
                   index,
                   VideoFullScreenPage(
                     videoPlayerController:
-                        controller.betterPlayerControllerList[index],
+                        controller.videoPlayerControllerList[index],
                   ),
-                  controller.betterPlayerControllerList[index],
+                  controller.videoPlayerControllerList[index],
                   controller.pageController);
         }),
       ),
