@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: WhiteCodelReels(
                     key: UniqueKey(),
+                    thumbnail: "https://sample-videos.com/img/Sample-jpg-image-700x400.jpg",
                     context: context,
                     loader: const Center(
                       child: CircularProgressIndicator(),
@@ -66,12 +67,12 @@ class MyApp extends StatelessWidget {
                       StreamController<double> videoProgressController =
                           StreamController<double>();
 
-                      videoPlayerController.addListener(() {
-                        double videoProgress = videoPlayerController
-                                .value.position.inMilliseconds /
-                            videoPlayerController.value.duration.inMilliseconds;
-                        videoProgressController.add(videoProgress);
-                      });
+                      // videoPlayerController.addListener(() {
+                      //   double videoProgress = videoPlayerController
+                      //           .value.position.inMilliseconds /
+                      //       videoPlayerController.value.duration.inMilliseconds;
+                      //   videoProgressController.add(videoProgress);
+                      // });
 
                       return Stack(
                         children: [
@@ -361,11 +362,11 @@ class MyApp extends StatelessWidget {
                                     inactiveColor: Colors.white,
 
                                     onChanged: (value) {
-                                      final position = videoPlayerController
-                                              .value.duration.inMilliseconds *
-                                          value;
-                                      videoPlayerController.seekTo(Duration(
-                                          milliseconds: position.toInt()));
+                                      // final position = videoPlayerController
+                                      //         .value.duration.inMilliseconds *
+                                      //     value;
+                                      // videoPlayerController.seekTo(Duration(
+                                      //     milliseconds: position.toInt()));
                                     },
                                     // onChangeEnd: (value) {
                                     //   videoPlayerController.play();

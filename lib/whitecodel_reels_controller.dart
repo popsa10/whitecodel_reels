@@ -1,22 +1,21 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
-
 import 'video_controller_service.dart';
 
 // Controller class for managing the reels in the app
 class WhiteCodelReelsController extends GetxController
     with GetTickerProviderStateMixin, WidgetsBindingObserver {
   // Page controller for managing pages of videos
-  PageController pageController = PageController(viewportFraction: 0.99999);
+  PageController pageController = PageController(viewportFraction: 0.8,);
 
   // List of video player controllers
-  RxList<VideoPlayerController> videoPlayerControllerList =
-      <VideoPlayerController>[].obs;
+  RxList<BetterPlayerController> videoPlayerControllerList =
+      <BetterPlayerController>[].obs;
 
   // Service for managing cached video controllers
   CachedVideoControllerService videoControllerService =
@@ -71,26 +70,18 @@ class WhiteCodelReelsController extends GetxController
   RxInt pageCount = 0.obs;
 
   final int startIndex;
+  final String thumbnail;
 
   // Constructor
   WhiteCodelReelsController(
       {required this.reelsVideoList,
       required this.isCaching,
-      this.startIndex = 0});
+      this.startIndex = 0,
+        required this.thumbnail,
+      });
 
-  // Lifecycle method for handling app lifecycle state changes
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      // Pause all video players when the app is paused
-      for (var i = 0; i < videoPlayerControllerList.length; i++) {
-        videoPlayerControllerList[i].pause();
-      }
-    }
-  }
 
-  // Lifecycle method called when the controller is initialized
+
   @override
   void onInit() {
     super.onInit();
@@ -130,9 +121,20 @@ class WhiteCodelReelsController extends GetxController
     int myindex = startIndex;
 
     try {
-      if (!videoPlayerControllerList[myindex].value.isInitialized) {
+      if (!videoPlayerControllerList[myindex].isVideoInitialized()!) {
         cacheVideo(myindex);
-        await videoPlayerControllerList[myindex].initialize();
+        videoPlayerControllerList[myindex] = BetterPlayerController(
+          betterPlayerDataSource: BetterPlayerDataSource(BetterPlayerDataSourceType.network, reelsVideoList[myindex]),
+            BetterPlayerConfiguration(
+          controlsConfiguration: BetterPlayerControlsConfiguration(
+            showControlsOnInitialize: false,
+            showControls: false
+          ),
+          fit: BoxFit.cover,
+          looping: true,
+          autoPlay: true,
+          placeholder: Image.network(thumbnail)
+        ));
         increasePage(myindex + 1);
       }
     } catch (e) {
@@ -162,7 +164,7 @@ class WhiteCodelReelsController extends GetxController
     for (var i = 0; i < videoList.length; i++) {
       String videoFile = videoList[i];
       final controller = await videoControllerService.getControllerForVideo(
-          videoFile, isCaching);
+          videoFile, isCaching,thumbnail);
       videoPlayerControllerList.add(controller);
     }
   }
@@ -186,9 +188,20 @@ class WhiteCodelReelsController extends GetxController
       for (var i = currentPage; i < maxPage; i++) {
         if (videoFiles.asMap().containsKey(i)) {
           var controller = videoPlayerControllerList[i];
-          if (!controller.value.isInitialized) {
+          if (!controller.isVideoInitialized()!) {
             cacheVideo(i);
-            await controller.initialize();
+            controller = BetterPlayerController(
+                betterPlayerDataSource: BetterPlayerDataSource(BetterPlayerDataSourceType.network, reelsVideoList[i]),
+                BetterPlayerConfiguration(
+                    controlsConfiguration: BetterPlayerControlsConfiguration(
+                        showControlsOnInitialize: false,
+                        showControls: false
+                    ),
+                    fit: BoxFit.cover,
+                    looping: true,
+                    autoPlay: true,
+                    placeholder: Image.network(thumbnail)
+                ));
             increasePage(i + 1);
             refreshView();
             // listenEvents(i);
@@ -198,12 +211,12 @@ class WhiteCodelReelsController extends GetxController
       for (var i = index - 1; i > index - loadLimit; i--) {
         if (videoList.asMap().containsKey(i)) {
           var controller = videoPlayerControllerList[i];
-          if (!controller.value.isInitialized) {
+          if (!controller.isVideoInitialized()!) {
             if (!caching.contains(videoList[index])) {
               cacheVideo(index);
             }
 
-            await controller.initialize();
+            controller.isVideoInitialized()!;
             increasePage(i + 1);
             refreshView();
             // listenEvents(i);
@@ -224,27 +237,25 @@ class WhiteCodelReelsController extends GetxController
   // Try initializing video at index
   tryInit(int index) async {
     var oldVideoPlayerController = videoPlayerControllerList[index];
-    if (oldVideoPlayerController.value.isInitialized) {
+    if (oldVideoPlayerController.isVideoInitialized()!) {
       oldVideoPlayerController.play();
       refresh();
       return;
     }
-    VideoPlayerController videoPlayerControllerTmp =
+    BetterPlayerController videoPlayerControllerTmp =
         await videoControllerService.getControllerForVideo(
-            videoList[index], isCaching);
+            videoList[index], isCaching,thumbnail);
     videoPlayerControllerList[index] = videoPlayerControllerTmp;
-    await oldVideoPlayerController.dispose();
+    oldVideoPlayerController.dispose();
     refreshView();
     if (!caching.contains(videoList[index])) {
       cacheVideo(index);
     }
-    await videoPlayerControllerTmp
-        .initialize()
-        .catchError((e) {})
-        .then((value) {
+    if( videoPlayerControllerTmp
+        .isVideoInitialized()!){
       videoPlayerControllerTmp.play();
       refresh();
-    });
+    }
   }
 
   // Dispose nearby old video controllers
@@ -253,12 +264,12 @@ class WhiteCodelReelsController extends GetxController
     for (var i = index - loadLimit; i > 0; i--) {
       if (videoPlayerControllerList.asMap().containsKey(i)) {
         var oldVideoPlayerController = videoPlayerControllerList[i];
-        VideoPlayerController videoPlayerControllerTmp =
+        BetterPlayerController videoPlayerControllerTmp =
             await videoControllerService.getControllerForVideo(
-                videoList[i], isCaching);
+                videoList[i], isCaching,thumbnail);
         videoPlayerControllerList[i] = videoPlayerControllerTmp;
         alreadyListened.remove(i);
-        await oldVideoPlayerController.dispose();
+         oldVideoPlayerController.dispose();
         refreshView();
       }
     }
@@ -266,12 +277,12 @@ class WhiteCodelReelsController extends GetxController
     for (var i = index + loadLimit; i < videoPlayerControllerList.length; i++) {
       if (videoPlayerControllerList.asMap().containsKey(i)) {
         var oldVideoPlayerController = videoPlayerControllerList[i];
-        VideoPlayerController videoPlayerControllerTmp =
+        BetterPlayerController videoPlayerControllerTmp =
             await videoControllerService.getControllerForVideo(
-                videoList[i], isCaching);
+                videoList[i], isCaching,thumbnail);
         videoPlayerControllerList[i] = videoPlayerControllerTmp;
         alreadyListened.remove(i);
-        await oldVideoPlayerController.dispose();
+        oldVideoPlayerController.dispose();
         refreshView();
       }
     }
@@ -283,10 +294,10 @@ class WhiteCodelReelsController extends GetxController
     alreadyListened.add(i);
     var videoPlayerController = videoPlayerControllerList[i];
 
-    videoPlayerController.addListener(() {
-      if (videoPlayerController.value.position ==
-              videoPlayerController.value.duration &&
-          videoPlayerController.value.duration != Duration.zero) {
+    videoPlayerController.videoPlayerController!.addListener(() {
+      if (videoPlayerController.videoPlayerController!.value.position ==
+              videoPlayerController.videoPlayerController!.value.duration &&
+          videoPlayerController.videoPlayerController!.value.duration != Duration.zero) {
         videoPlayerController.seekTo(Duration.zero);
         videoPlayerController.play();
       }
