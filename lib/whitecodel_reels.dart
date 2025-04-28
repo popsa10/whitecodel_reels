@@ -1,8 +1,8 @@
 library whitecodel_reels;
 
-import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'whitecodel_reels_controller.dart';
@@ -18,7 +18,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
     BuildContext context,
     int index,
     Widget child,
-    BetterPlayerController videoPlayerController,
+      VideoPlayerController videoPlayerController,
     PageController pageController,
   )? builder;
 
@@ -85,7 +85,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       },
       child: GestureDetector(
         onTap: () {
-          if (controller.videoPlayerControllerList[index].videoPlayerController!.value.isPlaying) {
+          if (controller.videoPlayerControllerList[index].value.isPlaying) {
             controller.videoPlayerControllerList[index].pause();
             controller.visible.value = true;
             controller.refreshView();
@@ -104,7 +104,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
         child: Obx(() {
           if (controller.loading.value ||
               !controller
-                  .videoPlayerControllerList[index].isVideoInitialized()!) {
+                  .videoPlayerControllerList[index].value.isInitialized) {
             return loader ?? const Center(child: CircularProgressIndicator());
           }
 
@@ -128,7 +128,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
 }
 
 class VideoFullScreenPage extends StatelessWidget {
-  final BetterPlayerController videoPlayerController;
+  final VideoPlayerController videoPlayerController;
 
   const VideoFullScreenPage({super.key, required this.videoPlayerController});
 
@@ -145,9 +145,9 @@ class VideoFullScreenPage extends StatelessWidget {
             fit: BoxFit.cover,
             child: SizedBox(
               width: MediaQuery.of(context).size.height *
-                  videoPlayerController.videoPlayerController!.value.aspectRatio,
+                  videoPlayerController.value.aspectRatio,
               height: MediaQuery.of(context).size.height,
-              child: BetterPlayer(controller: videoPlayerController),
+              child: VideoPlayer(videoPlayerController),
             ),
           ),
         ),
@@ -173,7 +173,7 @@ class VideoFullScreenPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: videoPlayerController.isPlaying()!
+                    child: videoPlayerController.value.isPlaying
                         ? const Icon(
                             Icons.play_arrow,
                             color: Colors.white,

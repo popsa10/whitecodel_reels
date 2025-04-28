@@ -1,15 +1,14 @@
 // Importing necessary packages
 import 'dart:async'; // For asynchronous operations
 import 'dart:developer'; // For logging
-
-import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart'; // For caching files
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:video_player/video_player.dart'; // For caching files
 
 // Abstract class defining a service for obtaining video controllers
 abstract class VideoControllerService {
   // Method to get a VideoPlayerController for a given video URL
-  Future<BetterPlayerController> getControllerForVideo(
+  Future<VideoPlayerController> getControllerForVideo(
       String url, bool isCaching,String thumbnail);
 }
 
@@ -21,7 +20,7 @@ class CachedVideoControllerService extends VideoControllerService {
   CachedVideoControllerService(this._cacheManager);
 
   @override
-  Future<BetterPlayerController> getControllerForVideo(
+  Future<VideoPlayerController> getControllerForVideo(
       String url, bool isCaching,String thumbnail) async {
     if (isCaching) {
       FileInfo?
@@ -40,18 +39,7 @@ class CachedVideoControllerService extends VideoControllerService {
         // Log that video was found in cache
         // log('Video found in cache');
         // Return VideoPlayerController for the cached file
-        return BetterPlayerController(
-            betterPlayerDataSource: BetterPlayerDataSource(BetterPlayerDataSourceType.file, fileInfo.file.path),
-            BetterPlayerConfiguration(
-                controlsConfiguration: BetterPlayerControlsConfiguration(
-                    showControlsOnInitialize: false,
-                    showControls: false
-                ),
-                fit: BoxFit.cover,
-                looping: true,
-                autoPlay: true,
-                placeholder: Image.network(thumbnail)
-            ));
+        return VideoPlayerController.file(fileInfo.file);
       }
 
       try {
@@ -64,17 +52,6 @@ class CachedVideoControllerService extends VideoControllerService {
     }
 
     // Return VideoPlayerController for the video from the network
-    return BetterPlayerController(
-        betterPlayerDataSource: BetterPlayerDataSource(BetterPlayerDataSourceType.network, url),
-        BetterPlayerConfiguration(
-            controlsConfiguration: BetterPlayerControlsConfiguration(
-                showControlsOnInitialize: false,
-                showControls: false
-            ),
-            fit: BoxFit.cover,
-            looping: true,
-            autoPlay: true,
-            placeholder: Image.network(thumbnail)
-        ));
+    return VideoPlayerController.networkUrl(Uri.parse(url));
   }
 }
