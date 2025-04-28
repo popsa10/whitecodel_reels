@@ -25,15 +25,6 @@ class WhiteCodelReelsController extends GetxController
   // Observable for loading state
   final loading = true.obs;
 
-  // Observable for visibility state
-  final visible = false.obs;
-
-  // Animation controller for animating
-  late AnimationController animationController;
-
-  // Animation object
-  late Animation animation;
-
   // Current page index
   int page = 1;
 
@@ -94,13 +85,7 @@ class WhiteCodelReelsController extends GetxController
   void onInit() {
     super.onInit();
     videoList.addAll(reelsVideoList);
-    // Initialize animation controller
-    animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 5));
-    animation = CurvedAnimation(
-      parent: animationController,
-      curve: Curves.easeIn,
-    );
+
     // Initialize service and start timer
     initService(startIndex: startIndex);
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
@@ -113,7 +98,7 @@ class WhiteCodelReelsController extends GetxController
   // Lifecycle method called when the controller is closed
   @override
   void onClose() {
-    animationController.dispose();
+
     // Pause and dispose all video players
     for (var i = 0; i < videoPlayerControllerList.length; i++) {
       videoPlayerControllerList[i].pause();
@@ -138,7 +123,6 @@ class WhiteCodelReelsController extends GetxController
       log('Error initializing video at index $myindex: $e');
     }
 
-    animationController.repeat();
     videoPlayerControllerList[myindex].play();
     refreshView();
     // listenEvents(myindex);

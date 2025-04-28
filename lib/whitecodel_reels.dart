@@ -59,22 +59,20 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       key: Key(index.toString()),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction < 0.5) {
+          controller.videoPlayerControllerList[index].seekTo(Duration.zero);
           controller.videoPlayerControllerList[index].pause();
           controller.refreshView();
-          controller.animationController.stop();
+
         } else {
           controller.listenEvents(index);
           controller.videoPlayerControllerList[index].play();
-          Future.delayed(const Duration(milliseconds: 500), () {
-            // controller.visible.value = false;
-          });
+
           controller.refreshView();
-          controller.animationController.repeat();
           controller.initNearByVideos(index);
           if (!controller.caching.contains(controller.videoList[index])) {
             controller.cacheVideo(index);
           }
-          controller.visible.value = false;
+
         }
       },
       child: Obx(() {
@@ -108,63 +106,13 @@ class VideoFullScreenPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WhiteCodelReelsController controller =
-    Get.find<WhiteCodelReelsController>();
-    return Stack(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.height *
-                  videoPlayerController.value.aspectRatio,
-              height: MediaQuery.of(context).size.height,
-              child: VideoPlayer(videoPlayerController),
-            ),
-          ),
-        ),
-        Positioned(
-          child: Center(
-            child: Obx(
-                  () => Opacity(
-                opacity: .5,
-                child: AnimatedOpacity(
-                  opacity: controller.visible.value ? 1 : 0,
-                  duration: const Duration(milliseconds: 500),
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: 70,
-                    height: 70,
-                    decoration: const BoxDecoration(
-                      color: Colors.black38,
-                      shape: BoxShape.circle,
-                      border: Border.fromBorderSide(
-                        BorderSide(
-                          color: Colors.white,
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: videoPlayerController.value.isPlaying
-                        ? const Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
-                      size: 40,
-                    )
-                        : const Icon(
-                      Icons.pause,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return SizedBox(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: VideoPlayer(videoPlayerController),
+      ),
     );
   }
 }
