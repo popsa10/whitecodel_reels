@@ -1,8 +1,8 @@
 library whitecodel_reels;
 
+import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'whitecodel_reels_controller.dart';
@@ -18,7 +18,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
     BuildContext context,
     int index,
     Widget child,
-      VideoPlayerController videoPlayerController,
+      BetterPlayerController videoPlayerController,
     PageController pageController,
   )? builder;
 
@@ -32,6 +32,8 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
     this.builder,
     this.startIndex = 0,
   });
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +64,14 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       key: Key(index.toString()),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction < 0.5) {
-          controller.videoPlayerControllerList[index].seekTo(Duration.zero);
-          controller.videoPlayerControllerList[index].pause();
+          controller.betterPlayerControllerList[index].seekTo(Duration.zero);
+          controller.betterPlayerControllerList[index].pause();
           // controller.visible.value = true;
           controller.refreshView();
           controller.animationController.stop();
         } else {
           controller.listenEvents(index);
-          controller.videoPlayerControllerList[index].play();
+          controller.betterPlayerControllerList[index].play();
           // controller.visible.value = true;
           Future.delayed(const Duration(milliseconds: 500), () {
             // controller.visible.value = false;
@@ -85,13 +87,13 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       },
       child: GestureDetector(
         onTap: () {
-          if (controller.videoPlayerControllerList[index].value.isPlaying) {
-            controller.videoPlayerControllerList[index].pause();
+          if (controller.betterPlayerControllerList[index].isPlaying()!) {
+            controller.betterPlayerControllerList[index].pause();
             controller.visible.value = true;
             controller.refreshView();
             controller.animationController.stop();
           } else {
-            controller.videoPlayerControllerList[index].play();
+            controller.betterPlayerControllerList[index].play();
             controller.visible.value = true;
             Future.delayed(const Duration(milliseconds: 500), () {
               controller.visible.value = false;
@@ -103,23 +105,23 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
         },
         child: Obx(() {
           if (controller.loading.value ||
-              !controller
-                  .videoPlayerControllerList[index].value.isInitialized) {
+              !(controller
+                  .betterPlayerControllerList[index].isVideoInitialized() ?? false)) {
             return loader ?? const Center(child: CircularProgressIndicator());
           }
 
           return builder == null
               ? VideoFullScreenPage(
                   videoPlayerController:
-                      controller.videoPlayerControllerList[index])
+                      controller.betterPlayerControllerList[index])
               : builder!(
                   context,
                   index,
                   VideoFullScreenPage(
                     videoPlayerController:
-                        controller.videoPlayerControllerList[index],
+                        controller.betterPlayerControllerList[index],
                   ),
-                  controller.videoPlayerControllerList[index],
+                  controller.betterPlayerControllerList[index],
                   controller.pageController);
         }),
       ),
@@ -128,7 +130,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
 }
 
 class VideoFullScreenPage extends StatelessWidget {
-  final VideoPlayerController videoPlayerController;
+  final BetterPlayerController videoPlayerController;
 
   const VideoFullScreenPage({super.key, required this.videoPlayerController});
 
@@ -145,9 +147,9 @@ class VideoFullScreenPage extends StatelessWidget {
             fit: BoxFit.cover,
             child: SizedBox(
               width: MediaQuery.of(context).size.height *
-                  videoPlayerController.value.aspectRatio,
+                  videoPlayerController.videoPlayerController!.value.aspectRatio,
               height: MediaQuery.of(context).size.height,
-              child: VideoPlayer(videoPlayerController),
+              child: BetterPlayer(controller: videoPlayerController),
             ),
           ),
         ),
@@ -173,7 +175,7 @@ class VideoFullScreenPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: videoPlayerController.value.isPlaying
+                    child: videoPlayerController.isPlaying()!
                         ? const Icon(
                             Icons.play_arrow,
                             color: Colors.white,

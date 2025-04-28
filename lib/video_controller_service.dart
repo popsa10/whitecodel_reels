@@ -1,15 +1,15 @@
 // Importing necessary packages
 import 'dart:async'; // For asynchronous operations
 import 'dart:developer'; // For logging
+import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:video_player/video_player.dart'; // For caching files
 
-// Abstract class defining a service for obtaining video controllers
+// Abstract class defining a service for obtaining better player controllers
 abstract class VideoControllerService {
-  // Method to get a VideoPlayerController for a given video URL
-  Future<VideoPlayerController> getControllerForVideo(
-      String url, bool isCaching,String thumbnail);
+  // Method to get a BetterPlayerController for a given video URL
+  Future<BetterPlayerController> getControllerForVideo(
+      String url, bool isCaching, String thumbnail);
 }
 
 // Implementation of VideoControllerService that uses caching
@@ -20,11 +20,12 @@ class CachedVideoControllerService extends VideoControllerService {
   CachedVideoControllerService(this._cacheManager);
 
   @override
-  Future<VideoPlayerController> getControllerForVideo(
-      String url, bool isCaching,String thumbnail) async {
+  Future<BetterPlayerController> getControllerForVideo(
+      String url, bool isCaching, String thumbnail) async {
+    String videoUrl = url;
+
     if (isCaching) {
-      FileInfo?
-          fileInfo; // Variable to store file info if video is found in cache
+      FileInfo? fileInfo; // Variable to store file info if video is found in cache
 
       try {
         // Attempt to retrieve video file from cache
@@ -38,20 +39,41 @@ class CachedVideoControllerService extends VideoControllerService {
       if (fileInfo != null) {
         // Log that video was found in cache
         // log('Video found in cache');
-        // Return VideoPlayerController for the cached file
-        return VideoPlayerController.file(fileInfo.file);
-      }
-
-      try {
-        // If video is not found in cache, attempt to download it
-        _cacheManager.downloadFile(url);
-      } catch (e) {
-        // Log error if encountered while downloading video
-        log('Error downloading video: $e');
+        // Use the cached file path
+        videoUrl = fileInfo.file.path;
+      } else {
+        try {
+          // If video is not found in cache, attempt to download it
+          await _cacheManager.downloadFile(url);
+        } catch (e) {
+          // Log error if encountered while downloading video
+          log('Error downloading video: $e');
+        }
       }
     }
 
-    // Return VideoPlayerController for the video from the network
-    return VideoPlayerController.networkUrl(Uri.parse(url));
+    // Create BetterPlayerDataSource
+    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      videoUrl,
+      cacheConfiguration: BetterPlayerCacheConfiguration(
+        useCache: isCaching,
+        preCacheSize: 10 * 1024 * 1024, // 10MB pre-cache size
+        maxCacheSize: 100 * 1024 * 1024, // 100MB max cache size
+        maxCacheFileSize: 10 * 1024 * 1024, // 10MB max single file cache size
+      ),
+      placeholder: thumbnail.isNotEmpty ? Image.network(thumbnail) : null,
+    );
+
+    // Create BetterPlayerConfiguration
+    BetterPlayerConfiguration configuration = const BetterPlayerConfiguration(
+      autoPlay: false,
+      looping: false,
+      aspectRatio: 16 / 9,
+      fit: BoxFit.contain,
+    );
+
+    // Return the BetterPlayerController with the configuration and data source
+    return BetterPlayerController(configuration, betterPlayerDataSource: dataSource);
   }
 }
