@@ -86,8 +86,8 @@ class MyApp extends StatelessWidget {
                     isCaching: false,
                     videoList:
                         List.generate(videos.length, (index) => videos[index]),
-                    videoThumbnailList:
-                    List.generate(videos.length, (index) => videos[index]),
+                    // videoThumbnailList:
+                    // List.generate(videos.length, (index) => videos[index]),
                     builder: (context, index, child, videoPlayerController,
                         pageController) {
                       bool isReadMore = false;

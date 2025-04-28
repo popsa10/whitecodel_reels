@@ -1,15 +1,15 @@
 // Importing necessary packages
 import 'dart:async'; // For asynchronous operations
 import 'dart:developer'; // For logging
-import 'package:better_player_plus/better_player_plus.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-// Abstract class defining a service for obtaining better player controllers
+import 'package:flutter_cache_manager/flutter_cache_manager.dart'; // For caching files
+import 'package:video_player/video_player.dart'; // For video playback
+
+// Abstract class defining a service for obtaining video controllers
 abstract class VideoControllerService {
-  // Method to get a BetterPlayerController for a given video URL
-  Future<BetterPlayerController> getControllerForVideo(
-      String url, bool isCaching, String thumbnail);
+  // Method to get a VideoPlayerController for a given video URL
+  Future<VideoPlayerController> getControllerForVideo(
+      String url, bool isCaching);
 }
 
 // Implementation of VideoControllerService that uses caching
@@ -20,13 +20,11 @@ class CachedVideoControllerService extends VideoControllerService {
   CachedVideoControllerService(this._cacheManager);
 
   @override
-  Future<BetterPlayerController> getControllerForVideo(
-      String url, bool isCaching, String thumbnail) async {
-    String videoUrl = url;
-
+  Future<VideoPlayerController> getControllerForVideo(
+      String url, bool isCaching) async {
     if (isCaching) {
       FileInfo?
-          fileInfo; // Variable to store file info if video is found in cache
+      fileInfo; // Variable to store file info if video is found in cache
 
       try {
         // Attempt to retrieve video file from cache
@@ -40,66 +38,20 @@ class CachedVideoControllerService extends VideoControllerService {
       if (fileInfo != null) {
         // Log that video was found in cache
         // log('Video found in cache');
-        // Use the cached file path
-        videoUrl = fileInfo.file.path;
-        var dataSource = BetterPlayerDataSource(
-          BetterPlayerDataSourceType.file,
-          videoUrl,
-        );
+        // Return VideoPlayerController for the cached file
+        return VideoPlayerController.file(fileInfo.file);
+      }
 
-        // Create BetterPlayerConfiguration
-        return BetterPlayerController(
-            BetterPlayerConfiguration(
-              looping: true,
-              controlsConfiguration: BetterPlayerControlsConfiguration(
-                showControls: false,
-                showControlsOnInitialize: false,
-              ),
-              placeholder: Image.network(
-                thumbnail,
-                fit: BoxFit.cover,
-              ),
-              fit: BoxFit.cover,
-            ),
-            betterPlayerDataSource: dataSource);
-      } else {
-        try {
-          // If video is not found in cache, attempt to download it
-          await _cacheManager.downloadFile(url);
-        } catch (e) {
-          // Log error if encountered while downloading video
-          log('Error downloading video: $e');
-        }
+      try {
+        // If video is not found in cache, attempt to download it
+        _cacheManager.downloadFile(url);
+      } catch (e) {
+        // Log error if encountered while downloading video
+        log('Error downloading video: $e');
       }
     }
 
-    // Create BetterPlayerDataSource
-    var dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      url,
-      cacheConfiguration: BetterPlayerCacheConfiguration(
-        useCache: isCaching,
-        preCacheSize: 10 * 1024 * 1024, // 10MB pre-cache size
-        maxCacheSize: 100 * 1024 * 1024, // 100MB max cache size
-        maxCacheFileSize: 10 * 1024 * 1024, // 10MB max single file cache size
-      ),
-      placeholder: thumbnail.isNotEmpty ? Image.network(thumbnail) : null,
-    );
-
-    // Create BetterPlayerConfiguration
-    return BetterPlayerController(
-        BetterPlayerConfiguration(
-          looping: true,
-          controlsConfiguration: BetterPlayerControlsConfiguration(
-            showControls: false,
-            showControlsOnInitialize: false,
-          ),
-          fit: BoxFit.cover,
-          placeholder: Image.network(
-            thumbnail,
-            fit: BoxFit.cover,
-          ),
-        ),
-        betterPlayerDataSource: dataSource);
+    // Return VideoPlayerController for the video from the network
+    return VideoPlayerController.networkUrl(Uri.parse(url));
   }
 }

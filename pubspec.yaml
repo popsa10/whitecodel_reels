@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   flutter_cache_manager: ^3.4.1
   get: ^4.7.2
-  better_player_plus:
+  video_player:
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:

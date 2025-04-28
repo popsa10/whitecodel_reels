@@ -1,10 +1,9 @@
 library whitecodel_reels;
 
-import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
 import 'whitecodel_reels_controller.dart';
 
 class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
@@ -13,19 +12,17 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
   final Widget? loader;
   final bool isCaching;
   final int startIndex;
-  final List<String>? videoThumbnailList;
   final Widget Function(
-    BuildContext context,
-    int index,
-    Widget child,
-      BetterPlayerController videoPlayerController,
-    PageController pageController,
-  )? builder;
+      BuildContext context,
+      int index,
+      Widget child,
+      VideoPlayerController videoPlayerController,
+      PageController pageController,
+      )? builder;
 
   const WhiteCodelReels({
     super.key,
     required this.context,
-    required this.videoThumbnailList,
     this.videoList,
     this.loader,
     this.isCaching = false,
@@ -33,21 +30,18 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
     this.startIndex = 0,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
     Get.delete<WhiteCodelReelsController>();
     Get.lazyPut<WhiteCodelReelsController>(() => WhiteCodelReelsController(
-          reelsVideoList: videoList ?? [],
-          isCaching: isCaching,
-          startIndex: startIndex,
-      reelsVideoThumbnailList: videoThumbnailList ?? []
-        ));
+      reelsVideoList: videoList ?? [],
+      isCaching: isCaching,
+      startIndex: startIndex,
+    ));
     return Scaffold(
       backgroundColor: Colors.black,
       body: Obx(
-        () => PageView.builder(
+            () => PageView.builder(
           controller: controller.pageController,
           itemCount: controller.pageCount.value,
           scrollDirection: Axis.vertical,
@@ -87,7 +81,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       },
       child: GestureDetector(
         onTap: () {
-          if (controller.videoPlayerControllerList[index].isPlaying()!) {
+          if (controller.videoPlayerControllerList[index].value.isPlaying) {
             controller.videoPlayerControllerList[index].pause();
             controller.visible.value = true;
             controller.refreshView();
@@ -105,24 +99,24 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
         },
         child: Obx(() {
           if (controller.loading.value ||
-              !(controller
-                  .videoPlayerControllerList[index].isVideoInitialized() ?? false)) {
+              !controller
+                  .videoPlayerControllerList[index].value.isInitialized) {
             return loader ?? const Center(child: CircularProgressIndicator());
           }
 
           return builder == null
               ? VideoFullScreenPage(
-                  videoPlayerController:
-                      controller.videoPlayerControllerList[index])
+              videoPlayerController:
+              controller.videoPlayerControllerList[index])
               : builder!(
-                  context,
-                  index,
-                  VideoFullScreenPage(
-                    videoPlayerController:
-                        controller.videoPlayerControllerList[index],
-                  ),
-                  controller.videoPlayerControllerList[index],
-                  controller.pageController);
+              context,
+              index,
+              VideoFullScreenPage(
+                videoPlayerController:
+                controller.videoPlayerControllerList[index],
+              ),
+              controller.videoPlayerControllerList[index],
+              controller.pageController);
         }),
       ),
     );
@@ -130,14 +124,14 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
 }
 
 class VideoFullScreenPage extends StatelessWidget {
-  final BetterPlayerController videoPlayerController;
+  final VideoPlayerController videoPlayerController;
 
   const VideoFullScreenPage({super.key, required this.videoPlayerController});
 
   @override
   Widget build(BuildContext context) {
     WhiteCodelReelsController controller =
-        Get.find<WhiteCodelReelsController>();
+    Get.find<WhiteCodelReelsController>();
     return Stack(
       children: [
         SizedBox(
@@ -147,16 +141,16 @@ class VideoFullScreenPage extends StatelessWidget {
             fit: BoxFit.cover,
             child: SizedBox(
               width: MediaQuery.of(context).size.height *
-                  videoPlayerController.videoPlayerController!.value.aspectRatio,
+                  videoPlayerController.value.aspectRatio,
               height: MediaQuery.of(context).size.height,
-              child: BetterPlayer(controller: videoPlayerController),
+              child: VideoPlayer(videoPlayerController),
             ),
           ),
         ),
         Positioned(
           child: Center(
             child: Obx(
-              () => Opacity(
+                  () => Opacity(
                 opacity: .5,
                 child: AnimatedOpacity(
                   opacity: controller.visible.value ? 1 : 0,
@@ -175,17 +169,17 @@ class VideoFullScreenPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: videoPlayerController.isPlaying()!
+                    child: videoPlayerController.value.isPlaying
                         ? const Icon(
-                            Icons.play_arrow,
-                            color: Colors.white,
-                            size: 40,
-                          )
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 40,
+                    )
                         : const Icon(
-                            Icons.pause,
-                            color: Colors.white,
-                            size: 40,
-                          ),
+                      Icons.pause,
+                      color: Colors.white,
+                      size: 40,
+                    ),
                   ),
                 ),
               ),
