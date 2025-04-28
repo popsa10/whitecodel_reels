@@ -59,15 +59,12 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
       key: Key(index.toString()),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction < 0.5) {
-          controller.videoPlayerControllerList[index].seekTo(Duration.zero);
           controller.videoPlayerControllerList[index].pause();
-          // controller.visible.value = true;
           controller.refreshView();
           controller.animationController.stop();
         } else {
           controller.listenEvents(index);
           controller.videoPlayerControllerList[index].play();
-          // controller.visible.value = true;
           Future.delayed(const Duration(milliseconds: 500), () {
             // controller.visible.value = false;
           });
@@ -80,46 +77,26 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
           controller.visible.value = false;
         }
       },
-      child: GestureDetector(
-        onTap: () {
-          if (controller.videoPlayerControllerList[index].value.isPlaying) {
-            controller.videoPlayerControllerList[index].pause();
-            controller.visible.value = true;
-            controller.refreshView();
-            controller.animationController.stop();
-          } else {
-            controller.videoPlayerControllerList[index].play();
-            controller.visible.value = true;
-            Future.delayed(const Duration(milliseconds: 500), () {
-              controller.visible.value = false;
-            });
+      child: Obx(() {
+        if (!controller
+                .videoPlayerControllerList[index].value.isInitialized) {
+          return loader ?? const Center(child: CircularProgressIndicator());
+        }
 
-            controller.refreshView();
-            controller.animationController.repeat();
-          }
-        },
-        child: Obx(() {
-          if (controller.loading.value ||
-              !controller
-                  .videoPlayerControllerList[index].value.isInitialized) {
-            return loader ?? const Center(child: CircularProgressIndicator());
-          }
-
-          return builder == null
-              ? VideoFullScreenPage(
+        return builder == null
+            ? VideoFullScreenPage(
+            videoPlayerController:
+            controller.videoPlayerControllerList[index])
+            : builder!(
+            context,
+            index,
+            VideoFullScreenPage(
               videoPlayerController:
-              controller.videoPlayerControllerList[index])
-              : builder!(
-              context,
-              index,
-              VideoFullScreenPage(
-                videoPlayerController:
-                controller.videoPlayerControllerList[index],
-              ),
               controller.videoPlayerControllerList[index],
-              controller.pageController);
-        }),
-      ),
+            ),
+            controller.videoPlayerControllerList[index],
+            controller.pageController);
+      }),
     );
   }
 }
