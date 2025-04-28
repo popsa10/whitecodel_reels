@@ -42,6 +42,8 @@ class WhiteCodelReelsController extends GetxController
   // List of video URLs
   final List<String> reelsVideoList;
 
+  final List<String> reelsVideoThumbnail;
+
   // isCaching
   bool isCaching;
 
@@ -70,14 +72,13 @@ class WhiteCodelReelsController extends GetxController
   RxInt pageCount = 0.obs;
 
   final int startIndex;
-  final String thumbnail;
 
   // Constructor
   WhiteCodelReelsController(
       {required this.reelsVideoList,
       required this.isCaching,
       this.startIndex = 0,
-        required this.thumbnail,
+        required this.reelsVideoThumbnail,
       });
 
 
@@ -133,7 +134,7 @@ class WhiteCodelReelsController extends GetxController
           fit: BoxFit.cover,
           looping: true,
           autoPlay: true,
-          placeholder: Image.network(thumbnail)
+          placeholder: Image.network(reelsVideoThumbnail[myindex])
         ));
         increasePage(myindex + 1);
       }
@@ -164,7 +165,7 @@ class WhiteCodelReelsController extends GetxController
     for (var i = 0; i < videoList.length; i++) {
       String videoFile = videoList[i];
       final controller = await videoControllerService.getControllerForVideo(
-          videoFile, isCaching,thumbnail);
+          videoFile, isCaching,reelsVideoThumbnail[i]);
       videoPlayerControllerList.add(controller);
     }
   }
@@ -200,7 +201,7 @@ class WhiteCodelReelsController extends GetxController
                     fit: BoxFit.cover,
                     looping: true,
                     autoPlay: true,
-                    placeholder: Image.network(thumbnail)
+                    placeholder: Image.network(reelsVideoThumbnail[i])
                 ));
             increasePage(i + 1);
             refreshView();
@@ -244,7 +245,7 @@ class WhiteCodelReelsController extends GetxController
     }
     BetterPlayerController videoPlayerControllerTmp =
         await videoControllerService.getControllerForVideo(
-            videoList[index], isCaching,thumbnail);
+            videoList[index], isCaching,reelsVideoThumbnail[index]);
     videoPlayerControllerList[index] = videoPlayerControllerTmp;
     oldVideoPlayerController.dispose();
     refreshView();
@@ -266,7 +267,7 @@ class WhiteCodelReelsController extends GetxController
         var oldVideoPlayerController = videoPlayerControllerList[i];
         BetterPlayerController videoPlayerControllerTmp =
             await videoControllerService.getControllerForVideo(
-                videoList[i], isCaching,thumbnail);
+                videoList[i], isCaching,reelsVideoThumbnail[index]);
         videoPlayerControllerList[i] = videoPlayerControllerTmp;
         alreadyListened.remove(i);
          oldVideoPlayerController.dispose();
@@ -279,7 +280,7 @@ class WhiteCodelReelsController extends GetxController
         var oldVideoPlayerController = videoPlayerControllerList[i];
         BetterPlayerController videoPlayerControllerTmp =
             await videoControllerService.getControllerForVideo(
-                videoList[i], isCaching,thumbnail);
+                videoList[i], isCaching,reelsVideoThumbnail[index]);
         videoPlayerControllerList[i] = videoPlayerControllerTmp;
         alreadyListened.remove(i);
         oldVideoPlayerController.dispose();

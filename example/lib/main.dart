@@ -31,6 +31,32 @@ List<String> videos = [
   "https://sample-videos.com/video321/mp4/240/big_buck_bunny_240p_20mb.mp4",
   "https://sample-videos.com/video321/mp4/240/big_buck_bunny_240p_30mb.mp4"
 ];
+List<String> images = [
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+  "https://picsum.photos/200/300",
+];
 
 void main() async {
   await Future.delayed(const Duration(seconds: 1));
@@ -53,7 +79,6 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: WhiteCodelReels(
                     key: UniqueKey(),
-                    thumbnail: "https://sample-videos.com/img/Sample-jpg-image-700x400.jpg",
                     context: context,
                     loader: const Center(
                       child: CircularProgressIndicator(),
@@ -61,6 +86,8 @@ class MyApp extends StatelessWidget {
                     isCaching: false,
                     videoList:
                         List.generate(videos.length, (index) => videos[index]),
+                    videoThumbnailList:
+                    List.generate(videos.length, (index) => videos[index]),
                     builder: (context, index, child, videoPlayerController,
                         pageController) {
                       bool isReadMore = false;

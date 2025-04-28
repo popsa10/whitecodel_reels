@@ -13,7 +13,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
   final Widget? loader;
   final bool isCaching;
   final int startIndex;
-  final String thumbnail;
+  final List<String>? videoThumbnailList;
   final Widget Function(
     BuildContext context,
     int index,
@@ -25,7 +25,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
   const WhiteCodelReels({
     super.key,
     required this.context,
-    required this.thumbnail,
+    required this.videoThumbnailList,
     this.videoList,
     this.loader,
     this.isCaching = false,
@@ -40,7 +40,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
           reelsVideoList: videoList ?? [],
           isCaching: isCaching,
           startIndex: startIndex,
-      thumbnail: thumbnail
+      reelsVideoThumbnail: videoThumbnailList ?? []
         ));
     return Scaffold(
       backgroundColor: Colors.black,
@@ -105,11 +105,7 @@ class WhiteCodelReels extends GetView<WhiteCodelReelsController> {
           if (controller.loading.value ||
               !controller
                   .videoPlayerControllerList[index].isVideoInitialized()!) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Colors.red,
-              ),
-            );
+            return loader ?? const Center(child: CircularProgressIndicator());
           }
 
           return builder == null
