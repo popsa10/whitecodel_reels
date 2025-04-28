@@ -25,7 +25,8 @@ class CachedVideoControllerService extends VideoControllerService {
     String videoUrl = url;
 
     if (isCaching) {
-      FileInfo? fileInfo; // Variable to store file info if video is found in cache
+      FileInfo?
+          fileInfo; // Variable to store file info if video is found in cache
 
       try {
         // Attempt to retrieve video file from cache
@@ -41,6 +42,26 @@ class CachedVideoControllerService extends VideoControllerService {
         // log('Video found in cache');
         // Use the cached file path
         videoUrl = fileInfo.file.path;
+        var dataSource = BetterPlayerDataSource(
+          BetterPlayerDataSourceType.file,
+          videoUrl,
+        );
+
+        // Create BetterPlayerConfiguration
+        return BetterPlayerController(
+            BetterPlayerConfiguration(
+              looping: true,
+              controlsConfiguration: BetterPlayerControlsConfiguration(
+                showControls: false,
+                showControlsOnInitialize: false,
+              ),
+              placeholder: Image.network(
+                thumbnail,
+                fit: BoxFit.cover,
+              ),
+              fit: BoxFit.cover,
+            ),
+            betterPlayerDataSource: dataSource);
       } else {
         try {
           // If video is not found in cache, attempt to download it
@@ -53,9 +74,9 @@ class CachedVideoControllerService extends VideoControllerService {
     }
 
     // Create BetterPlayerDataSource
-    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+    var dataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
-      videoUrl,
+      url,
       cacheConfiguration: BetterPlayerCacheConfiguration(
         useCache: isCaching,
         preCacheSize: 10 * 1024 * 1024, // 10MB pre-cache size
@@ -66,18 +87,19 @@ class CachedVideoControllerService extends VideoControllerService {
     );
 
     // Create BetterPlayerConfiguration
-    BetterPlayerConfiguration configuration = const BetterPlayerConfiguration(
-      autoPlay: true,
-      looping: true,
-      controlsConfiguration: BetterPlayerControlsConfiguration(
-        showControls: false,
-        showControlsOnInitialize: false,
-      ),
-      fit: BoxFit.cover,
-
-    );
-
-    // Return the BetterPlayerController with the configuration and data source
-    return BetterPlayerController(configuration, betterPlayerDataSource: dataSource);
+    return BetterPlayerController(
+        BetterPlayerConfiguration(
+          looping: true,
+          controlsConfiguration: BetterPlayerControlsConfiguration(
+            showControls: false,
+            showControlsOnInitialize: false,
+          ),
+          fit: BoxFit.cover,
+          placeholder: Image.network(
+            thumbnail,
+            fit: BoxFit.cover,
+          ),
+        ),
+        betterPlayerDataSource: dataSource);
   }
 }

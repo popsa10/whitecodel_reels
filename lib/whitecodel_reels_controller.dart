@@ -136,9 +136,8 @@ class WhiteCodelReelsController extends GetxController
       if (!(videoPlayerControllerList[myindex].isVideoInitialized() ?? false)) {
         cacheVideo(myindex);
         videoPlayerControllerList[myindex] = BetterPlayerController(BetterPlayerConfiguration(
-          placeholder: Image.network(reelsVideoThumbnailList[myindex]),
+          placeholder: Image.network(reelsVideoThumbnailList[myindex],fit: BoxFit.cover,),
           looping: true,
-          autoPlay: true,
           fit: BoxFit.cover,
           controlsConfiguration: BetterPlayerControlsConfiguration(
             showControlsOnInitialize: false,
@@ -204,9 +203,8 @@ class WhiteCodelReelsController extends GetxController
           if (!(controller.isVideoInitialized() ?? false)) {
             cacheVideo(i);
              controller = BetterPlayerController(BetterPlayerConfiguration(
-                placeholder: Image.network(reelsVideoThumbnailList[i]),
+                placeholder: Image.network(reelsVideoThumbnailList[i],fit: BoxFit.cover,),
                 looping: true,
-                autoPlay: true,
                 fit: BoxFit.cover,
                 controlsConfiguration: BetterPlayerControlsConfiguration(
                     showControlsOnInitialize: false,
@@ -231,9 +229,8 @@ class WhiteCodelReelsController extends GetxController
             }
 
              controller = BetterPlayerController(BetterPlayerConfiguration(
-                placeholder: Image.network(reelsVideoThumbnailList[index]),
+                placeholder: Image.network(reelsVideoThumbnailList[index],fit: BoxFit.cover,),
                 looping: true,
-                autoPlay: true,
                 fit: BoxFit.cover,
                 controlsConfiguration: BetterPlayerControlsConfiguration(
                     showControlsOnInitialize: false,
@@ -278,9 +275,8 @@ class WhiteCodelReelsController extends GetxController
       cacheVideo(index);
     }
      videoPlayerControllerTmp = BetterPlayerController(BetterPlayerConfiguration(
-        placeholder: Image.network(reelsVideoThumbnailList[index]),
+        placeholder: Image.network(reelsVideoThumbnailList[index],fit: BoxFit.cover,),
         looping: true,
-        autoPlay: true,
         fit: BoxFit.cover,
         controlsConfiguration: BetterPlayerControlsConfiguration(
             showControlsOnInitialize: false,
